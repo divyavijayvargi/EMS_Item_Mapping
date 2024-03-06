@@ -1,0 +1,182 @@
+version: 0.0.11
+jobId: "1105"
+jobName: EMS_CR-ItemMapping
+jobType: Source Aligned Data Product
+domain: production
+alias: load_ems_cr_itemmapping
+discoveryPort:
+  name: EMS_CR-ItemMapping
+inputPorts:
+  - alias: mmat_item_1
+    isDynamic: true
+    tableLocation: s3://msil-ems-cr-item-map-ucqxah8tgo4nc5adakidp8b1tk476aps3b-s3alias/sr3/mat_de/mmat_item/
+    optional:
+      persistDataFrame: false
+      enableDataReconciliation: false
+      enforceSchema: false
+      connection: EMS S3 Connectivity Curated
+      dataSetUrn: urn:dv:dataset:410b4ee8-311b-49a9-bf77-edc0dc711e56
+      loggingOptions:
+        printSchema: true
+        count: true
+        showData: true
+    type: readDeltaTable
+  - alias: mmat_itui_1
+    isDynamic: true
+    tableLocation: s3://msil-ems-cr-item-map-ucqxah8tgo4nc5adakidp8b1tk476aps3b-s3alias/sr3/mat_de/mmat_itui/
+    optional:
+      persistDataFrame: false
+      enableDataReconciliation: false
+      enforceSchema: false
+      connection: EMS S3 Connectivity Curated
+      dataSetUrn: urn:dv:dataset:e1a4740a-3aa0-4718-8053-7045af25a054
+      loggingOptions:
+        printSchema: true
+        count: true
+        showData: true
+    type: readDeltaTable
+  - alias: mmat_mnmi_1
+    isDynamic: true
+    tableLocation: s3://msil-ems-cr-item-map-ucqxah8tgo4nc5adakidp8b1tk476aps3b-s3alias/sr3/mat_de/mmat_mnmi/
+    optional:
+      persistDataFrame: false
+      enableDataReconciliation: false
+      enforceSchema: false
+      connection: EMS S3 Connectivity Curated
+      dataSetUrn: urn:dv:dataset:943406a9-0443-4b0a-be3b-6cd9e8e9277f
+      loggingOptions:
+        printSchema: true
+        count: true
+        showData: true
+    type: readDeltaTable
+productState:
+  isDynamic: true
+  alias: load_ems_cr_itemmapping
+  retentionVersions: ""
+  logicalSchema:
+    properties:
+      New Item:
+        type: STRING
+        description: None
+        sourceColumn: mnmi_new_uom
+        sourceTable: mmat_mnmi
+      New Item Full Description:
+        type: STRING
+        description: None
+        sourceColumn: v_item_full_desc
+        sourceTable: mmat_itui
+      New Item Description:
+        type: STRING
+        description: None
+        sourceColumn: v_new_desc
+        sourceTable: mmat_item
+      New UOM:
+        type: STRING
+        description: None
+        sourceColumn: mnmi_new_uom
+        sourceTable: mmat_mnmi
+      Old Item:
+        type: STRING
+        description: None
+        sourceColumn: mnmi_old_item_code
+        sourceTable: mmat_mnmi
+      Old Item Description:
+        type: STRING
+        description: None
+        sourceColumn: v_old_desc
+        sourceTable: mmat_item
+      Old UOM:
+        type: STRING
+        description: None
+        sourceColumn: mnmi_old_uom
+        sourceTable: mmat_mnmi
+      etl_inserted_date:
+        type: STRING
+        description: None
+        sourceColumn: Audit column
+        sourceTable: ""
+      etl_modified_date:
+        type: STRING
+        description: None
+        sourceColumn: Audit column
+        sourceTable: ""
+      etl_created_by:
+        type: STRING
+        description: None
+        sourceColumn: Audit column
+        sourceTable: ""
+      etl_updated_by:
+        type: STRING
+        description: None
+        sourceColumn: Audit column
+        sourceTable: ""
+  stateStoreType: loadDataIceberg
+  isProfilingEnabled: false
+  updateStrategy: Overwrite
+  tableName: msil_dataverse_production_catalog.Item_Mapping_Master
+  warehousePath: s3://msil-dataverse-production/
+  catalogName: glue
+  optional:
+    persistDataFrame: false
+    enableDataReconciliation: false
+    enforceSchema: false
+    enforceSchemaMethod: Warning
+    catalogType: glue
+    loggingOptions:
+      printSchema: true
+      count: true
+      showData: true
+  refreshInterval: " 0 5 * * *"
+transformation:
+  - isDynamic: true
+    alias: query_ems_cr_itemmapping
+    description: query_ems_cr_itemmapping
+    sequence: 4
+    inputDataFrameList:
+      - inputDataFrame: mmat_item_1
+        tempViewName: mmat_item
+      - inputDataFrame: mmat_mnmi_1
+        tempViewName: mmat_mnmi
+      - inputDataFrame: mmat_itui_1
+        tempViewName: mmat_itui
+    query: SELECT   t.mnmi_new_uom AS `New
+      Item`,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(       regexp_replace(t.v_item_full_desc,
+      '"',
+      ''),                        '\n',''),                    '\r',''),                '
+      ',''),            '\t', '') AS `New Item Full
+      Description`,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(   regexp_replace(t.v_new_desc,
+      '"',
+      ''),                        '\n',''),                    '\r',''),                '
+      ',''),            '\t', '') AS `New Item Description`,   t.mnmi_new_uom AS
+      `New UOM`,   t.mnmi_old_item_code AS `Old
+      Item`,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(   regexp_replace(t.v_old_desc,
+      '"',
+      ''),                        '\n',''),                    '\r',''),                '
+      ',''),            '\t', '') AS `Old Item Description`,   t.mnmi_old_uom AS
+      `Old UOM`,   current_timestamp() AS
+      etl_inserted_date,   current_timestamp() AS
+      etl_modified_date,   'platform_admin' AS
+      etl_created_by,   'platform_admin' AS etl_updated_by FROM   (     SELECT
+      DISTINCT       i.mnmi_new_item_code,       i.mnmi_old_item_code,       i.mnmi_old_uom,       i.mnmi_new_uom,       i.mnmi_creation_date,       m.item_desc
+      AS v_new_desc,       m1.item_desc AS
+      v_old_desc,       COALESCE(hh.itui_item_full_desc, v_new_desc) AS
+      v_item_full_desc     FROM       mmat_mnmi i       LEFT JOIN mmat_item m ON
+      m.item_code = i.mnmi_new_item_code       LEFT JOIN mmat_item m1 ON
+      m1.item_code = i.mnmi_old_item_code       LEFT JOIN mmat_itui hh ON
+      COALESCE(hh.itui_app_flg, '@') = 'A'        AND itui_item_code =
+      i.mnmi_new_item_code   ) t;
+    optional:
+      persistDataFrame: false
+      loggingOptions:
+        printSchema: true
+        count: true
+        showData: true
+    type: operationThroughSqlQuery
+controlPort:
+  dataQualityRules: {}
+outputPort:
+  subscriptionChannels:
+    - channelType: Postgres
+      queryType: SQL
+    - channelType: Dataproduct
+      queryType: SQL
