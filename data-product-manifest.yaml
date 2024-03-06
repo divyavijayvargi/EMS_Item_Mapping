@@ -1,11 +1,11 @@
-version: 0.0.11
+version: 0.0.12
 jobId: "1105"
-jobName: EMS_CR-ItemMapping
+jobName: Item Mapping Master
 jobType: Source Aligned Data Product
 domain: production
 alias: load_ems_cr_itemmapping
 discoveryPort:
-  name: EMS_CR-ItemMapping
+  name: Item Mapping Master
 inputPorts:
   - alias: mmat_item_1
     isDynamic: true
