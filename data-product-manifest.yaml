@@ -1,4 +1,4 @@
-version: 0.0.12
+version: 0.0.16
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -55,40 +55,60 @@ productState:
   retentionVersions: ""
   logicalSchema:
     properties:
-      New Item:
+      New_Item:
         type: STRING
         description: None
-        sourceColumn: mnmi_new_uom
+        sourceColumn: mnmi_new_item_code
         sourceTable: mmat_mnmi
-      New Item Full Description:
+      New_Item_Full_Description:
         type: STRING
         description: None
         sourceColumn: v_item_full_desc
         sourceTable: mmat_itui
-      New Item Description:
+      New_Item_Description:
         type: STRING
         description: None
         sourceColumn: v_new_desc
         sourceTable: mmat_item
-      New UOM:
+      New_UOM:
         type: STRING
         description: None
         sourceColumn: mnmi_new_uom
         sourceTable: mmat_mnmi
-      Old Item:
+      Old_Item:
         type: STRING
         description: None
         sourceColumn: mnmi_old_item_code
         sourceTable: mmat_mnmi
-      Old Item Description:
+      Old_Item_Description:
         type: STRING
         description: None
         sourceColumn: v_old_desc
         sourceTable: mmat_item
-      Old UOM:
+      Old_UOM:
         type: STRING
         description: None
         sourceColumn: mnmi_old_uom
+        sourceTable: mmat_mnmi
+      Created_On:
+        type: DATETIME
+        description: None
+        sourceColumn: mnmi_creation_date
+        sourceTable: mmat_mnmi
+      Created_By:
+        type: STRING
+        description: None
+        sourceColumn: mnmi_created_by
+        sourceTable: mmat_mnmi
+      mnmi_updated_on:
+        type: DATETIME
+        description: None
+        sourceColumn: mnmi_updated_on
+        sourceTable: mmat_mnmi
+      mnmi_updated_by:
+        type: STRING
+        description: None
+        sourceColumn: mnmi_updated_by
         sourceTable: mmat_mnmi
       etl_inserted_date:
         type: STRING
@@ -139,32 +159,35 @@ transformation:
         tempViewName: mmat_mnmi
       - inputDataFrame: mmat_itui_1
         tempViewName: mmat_itui
-    query: SELECT   t.mnmi_new_uom AS `New
-      Item`,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(       regexp_replace(t.v_item_full_desc,
+    query: SELECT   t.mnmi_new_item_code AS
+      New_Item,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(       regexp_replace(t.v_item_full_desc,
       '"',
       ''),                        '\n',''),                    '\r',''),                '
-      ',''),            '\t', '') AS `New Item Full
-      Description`,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(   regexp_replace(t.v_new_desc,
+      ',''),            '\t', '') AS
+      New_Item_Full_Description,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(   regexp_replace(t.v_new_desc,
       '"',
       ''),                        '\n',''),                    '\r',''),                '
-      ',''),            '\t', '') AS `New Item Description`,   t.mnmi_new_uom AS
-      `New UOM`,   t.mnmi_old_item_code AS `Old
-      Item`,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(   regexp_replace(t.v_old_desc,
+      ',''),            '\t', '') AS New_Item_Description,   t.mnmi_new_uom AS
+      New_UOM,   t.mnmi_old_item_code AS
+      Old_Item,   regexp_replace(     regexp_replace(       regexp_replace(         regexp_replace(   regexp_replace(t.v_old_desc,
       '"',
       ''),                        '\n',''),                    '\r',''),                '
-      ',''),            '\t', '') AS `Old Item Description`,   t.mnmi_old_uom AS
-      `Old UOM`,   current_timestamp() AS
+      ',''),            '\t', '') AS Old_Item_Description,   t.mnmi_old_uom AS
+      Old_UOM,   t.mnmi_creation_date as Created_On,   t.mnmi_created_by as
+      Created_By,   t.mnmi_updated_on
+      ,   t.mnmi_updated_by,   current_timestamp() AS
       etl_inserted_date,   current_timestamp() AS
       etl_modified_date,   'platform_admin' AS
       etl_created_by,   'platform_admin' AS etl_updated_by FROM   (     SELECT
-      DISTINCT       i.mnmi_new_item_code,       i.mnmi_old_item_code,       i.mnmi_old_uom,       i.mnmi_new_uom,       i.mnmi_creation_date,       m.item_desc
-      AS v_new_desc,       m1.item_desc AS
+      DISTINCT       i.mnmi_new_item_code,       i.mnmi_old_item_code,       i.mnmi_old_uom,       i.mnmi_new_uom,       i.mnmi_creation_date,    i.mnmi_created_by,    i.mnmi_updated_on
+      ,    i.mnmi_updated_by,       m.item_desc AS
+      v_new_desc,       m1.item_desc AS
       v_old_desc,       COALESCE(hh.itui_item_full_desc, v_new_desc) AS
       v_item_full_desc     FROM       mmat_mnmi i       LEFT JOIN mmat_item m ON
       m.item_code = i.mnmi_new_item_code       LEFT JOIN mmat_item m1 ON
-      m1.item_code = i.mnmi_old_item_code       LEFT JOIN mmat_itui hh ON
-      COALESCE(hh.itui_app_flg, '@') = 'A'        AND itui_item_code =
-      i.mnmi_new_item_code   ) t;
+      m1.item_code = i.mnmi_old_item_code       LEFT JOIN (select * from
+      mmat_itui where COALESCE(itui_app_flg, '@') = 'A' ) hh ON
+      hh.itui_item_code = i.mnmi_new_item_code   ) t;
     optional:
       persistDataFrame: false
       loggingOptions:
