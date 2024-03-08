@@ -1,4 +1,4 @@
-version: 0.0.16
+version: 0.0.17
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -100,16 +100,6 @@ productState:
         description: None
         sourceColumn: mnmi_created_by
         sourceTable: mmat_mnmi
-      mnmi_updated_on:
-        type: DATETIME
-        description: None
-        sourceColumn: mnmi_updated_on
-        sourceTable: mmat_mnmi
-      mnmi_updated_by:
-        type: STRING
-        description: None
-        sourceColumn: mnmi_updated_by
-        sourceTable: mmat_mnmi
       etl_inserted_date:
         type: STRING
         description: None
@@ -174,14 +164,12 @@ transformation:
       ''),                        '\n',''),                    '\r',''),                '
       ',''),            '\t', '') AS Old_Item_Description,   t.mnmi_old_uom AS
       Old_UOM,   t.mnmi_creation_date as Created_On,   t.mnmi_created_by as
-      Created_By,   t.mnmi_updated_on
-      ,   t.mnmi_updated_by,   current_timestamp() AS
+      Created_By,   current_timestamp() AS
       etl_inserted_date,   current_timestamp() AS
       etl_modified_date,   'platform_admin' AS
       etl_created_by,   'platform_admin' AS etl_updated_by FROM   (     SELECT
-      DISTINCT       i.mnmi_new_item_code,       i.mnmi_old_item_code,       i.mnmi_old_uom,       i.mnmi_new_uom,       i.mnmi_creation_date,    i.mnmi_created_by,    i.mnmi_updated_on
-      ,    i.mnmi_updated_by,       m.item_desc AS
-      v_new_desc,       m1.item_desc AS
+      DISTINCT       i.mnmi_new_item_code,       i.mnmi_old_item_code,       i.mnmi_old_uom,       i.mnmi_new_uom,       i.mnmi_creation_date,    i.mnmi_created_by,       m.item_desc
+      AS v_new_desc,       m1.item_desc AS
       v_old_desc,       COALESCE(hh.itui_item_full_desc, v_new_desc) AS
       v_item_full_desc     FROM       mmat_mnmi i       LEFT JOIN mmat_item m ON
       m.item_code = i.mnmi_new_item_code       LEFT JOIN mmat_item m1 ON
