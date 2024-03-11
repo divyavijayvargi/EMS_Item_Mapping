@@ -1,4 +1,4 @@
-version: 0.0.23
+version: 0.0.24
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -136,7 +136,7 @@ productState:
       printSchema: true
       count: true
       showData: true
-  refreshInterval: " 0 5 * * *"
+  refreshInterval: 0 5 * * *
 transformation:
   - isDynamic: true
     alias: query_ems_cr_itemmapping
