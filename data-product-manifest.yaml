@@ -1,4 +1,4 @@
-version: 0.0.25
+version: 0.0.37
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -48,6 +48,26 @@ inputPorts:
         printSchema: true
         count: true
         showData: true
+    type: readDeltaTable
+  - alias: fcal_casual_employee_1
+    isDynamic: true
+    tableLocation: s3://msil-data-lake-curated/sr1/paylib_de/fcal_casual_employee
+    optional:
+      persistDataFrame: false
+      enableDataReconciliation: false
+      enforceSchema: false
+      connection: EMS S3 Connectivity Curated
+      dataSetUrn: urn:dv:dataset:e51c8db7-5c9b-4e1f-84ba-0fadab3bf4a2
+    type: readDeltaTable
+  - alias: fpay_empl_curated_1
+    isDynamic: true
+    tableLocation: s3://msil-data-lake-curated/sr1/pay_de/fpay_empl
+    optional:
+      persistDataFrame: false
+      enableDataReconciliation: false
+      enforceSchema: false
+      connection: EMS S3 Connectivity Curated
+      dataSetUrn: urn:dv:dataset:4519e640-24b3-461f-b243-287ab8630326
     type: readDeltaTable
 productState:
   isDynamic: true
@@ -100,6 +120,16 @@ productState:
         description: None
         sourceColumn: mnmi_updated_on
         sourceTable: mmat_mnmi
+      Created_By:
+        type: STRING
+        description: None
+        sourceColumn: derived
+        sourceTable: mmat_mnmi, fpay_empl, FCAL_CASUAL_EMPLOYEE
+      Updated_By:
+        type: STRING
+        description: None
+        sourceColumn: derived
+        sourceTable: mmat_mnmi, fpay_empl, FCAL_CASUAL_EMPLOYEE
       etl_inserted_date:
         type: STRING
         description: None
@@ -141,7 +171,7 @@ transformation:
   - isDynamic: true
     alias: query_ems_cr_itemmapping
     description: query_ems_cr_itemmapping
-    sequence: 4
+    sequence: 6
     inputDataFrameList:
       - inputDataFrame: mmat_item_1
         tempViewName: mmat_item
@@ -149,6 +179,10 @@ transformation:
         tempViewName: mmat_mnmi
       - inputDataFrame: mmat_itui_1
         tempViewName: mmat_itui
+      - inputDataFrame: fcal_casual_employee_1
+        tempViewName: FCAL_CASUAL_EMPLOYEE
+      - inputDataFrame: fpay_empl_curated_1
+        tempViewName: fpay_empl
     query: SELECT   t.mnmi_new_item_code AS
       New_Item,   regexp_replace(       regexp_replace(         regexp_replace(       regexp_replace(t.v_item_full_desc,
       '"',
@@ -162,20 +196,34 @@ transformation:
       Old_Item,  regexp_replace(       regexp_replace(         regexp_replace(       regexp_replace(t.v_old_desc,
       '"',
       ''),                        '\n',''),                    '\r',''),        '\t',
-      '') AS Old_Item_Description,      t.mnmi_old_uom AS
+      '') AS Old_Item_Description,     t.mnmi_old_uom AS
       Old_UOM,   t.mnmi_creation_date as Created_On,   t.mnmi_updated_on
-      ,   current_timestamp() AS etl_inserted_date,   current_timestamp() AS
+      ,   case when right(t.Created_By,1) = '-' then
+      regexp_replace(t.Created_By, '-', '') else t.Created_By end as
+      Created_By,   case when right(t.Updated_By,1) = '-' then
+      regexp_replace(t.Updated_By, '-', '') else t.Updated_By end as
+      Updated_By,   current_timestamp() AS
+      etl_inserted_date,   current_timestamp() AS
       etl_modified_date,   'platform_admin' AS
       etl_created_by,   'platform_admin' AS etl_updated_by FROM   (     SELECT
       DISTINCT       i.mnmi_new_item_code,       i.mnmi_old_item_code,       i.mnmi_old_uom,       i.mnmi_new_uom,       i.mnmi_creation_date,    i.mnmi_created_by,    i.mnmi_updated_on
-      ,       i.mnmi_updated_by,       m.item_desc AS
+      ,       i.mnmi_updated_by,    upper(concat(coalesce(i.mnmi_created_by,
+      ''), '-', coalesce(fpay.empl_name, '' ))) as
+      Created_By,    upper(concat(coalesce(i.mnmi_updated_by, ''), '-',
+      coalesce(fpay2.empl_name, ''))) as Updated_By,       m.item_desc AS
       v_new_desc,       m1.item_desc AS
       v_old_desc,       COALESCE(hh.itui_item_full_desc, v_new_desc) AS
       v_item_full_desc     FROM       mmat_mnmi i       LEFT JOIN mmat_item m ON
       m.item_code = i.mnmi_new_item_code       LEFT JOIN mmat_item m1 ON
       m1.item_code = i.mnmi_old_item_code       LEFT JOIN (select * from
       mmat_itui where COALESCE(itui_app_flg, '@') = 'A' ) hh ON
-      hh.itui_item_code = i.mnmi_new_item_code   ) t;
+      hh.itui_item_code = i.mnmi_new_item_code    left join ((select empl_id,
+      empl_name from fpay_empl where empl_status_hcv = 'OR') union (select
+      emp_id as empl_id, emp_name as empl_name from FCAL_CASUAL_EMPLOYEE )  )
+      fpay on fpay.empl_id = i.mnmi_created_by    left join ((select empl_id,
+      empl_name from fpay_empl where empl_status_hcv = 'OR') union (select
+      emp_id as empl_id, emp_name as empl_name from FCAL_CASUAL_EMPLOYEE )  )
+      fpay2 on fpay2.empl_id = i.mnmi_updated_by   ) t;
     optional:
       persistDataFrame: false
       loggingOptions:
