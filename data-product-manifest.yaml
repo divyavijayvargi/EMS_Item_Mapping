@@ -1,4 +1,4 @@
-version: 0.0.37
+version: 0.0.39
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -77,77 +77,77 @@ productState:
     properties:
       New_Item:
         type: STRING
-        description: None
+        description: New Item Code
         sourceColumn: mnmi_new_item_code
         sourceTable: mmat_mnmi
       New_Item_Full_Description:
         type: STRING
-        description: None
+        description: New Item Full Description
         sourceColumn: v_item_full_desc
         sourceTable: mmat_itui
       New_Item_Description:
         type: STRING
-        description: None
+        description: New Item Description
         sourceColumn: v_new_desc
         sourceTable: mmat_item
       New_UOM:
         type: STRING
-        description: None
+        description: New UOM
         sourceColumn: mnmi_new_uom
         sourceTable: mmat_mnmi
       Old_Item:
         type: STRING
-        description: None
+        description: Old Item code
         sourceColumn: mnmi_old_item_code
         sourceTable: mmat_mnmi
       Old_Item_Description:
         type: STRING
-        description: None
+        description: Old Item Description
         sourceColumn: v_old_desc
         sourceTable: mmat_item
       Old_UOM:
         type: STRING
-        description: None
+        description: Old UOM
         sourceColumn: mnmi_old_uom
         sourceTable: mmat_mnmi
       Created_On:
         type: DATETIME
-        description: None
+        description: Creation on Timestamp
         sourceColumn: mnmi_creation_date
         sourceTable: mmat_mnmi
       mnmi_updated_on:
         type: DATETIME
-        description: None
+        description: Updated on Timestamp
         sourceColumn: mnmi_updated_on
         sourceTable: mmat_mnmi
       Created_By:
         type: STRING
-        description: None
+        description: Created By Details
         sourceColumn: derived
-        sourceTable: mmat_mnmi, fpay_empl, FCAL_CASUAL_EMPLOYEE
+        sourceTable: mmat_mnmi, FCAL_CASUAL_EMPLOYEE
       Updated_By:
         type: STRING
-        description: None
+        description: Updated By Details
         sourceColumn: derived
-        sourceTable: mmat_mnmi, fpay_empl, FCAL_CASUAL_EMPLOYEE
+        sourceTable: mmat_mnmi, FCAL_CASUAL_EMPLOYEE
       etl_inserted_date:
         type: STRING
-        description: None
+        description: ETL Audit Fields
         sourceColumn: Audit column
         sourceTable: ""
       etl_modified_date:
         type: STRING
-        description: None
+        description: ETL Audit Fields
         sourceColumn: Audit column
         sourceTable: ""
       etl_created_by:
         type: STRING
-        description: None
+        description: ETL Audit Fields
         sourceColumn: Audit column
         sourceTable: ""
       etl_updated_by:
         type: STRING
-        description: None
+        description: ETL Audit Fields
         sourceColumn: Audit column
         sourceTable: ""
   stateStoreType: loadDataIceberg
