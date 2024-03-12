@@ -1,4 +1,4 @@
-version: 0.0.41
+version: 0.0.42
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -51,7 +51,7 @@ inputPorts:
     type: readDeltaTable
   - alias: fcal_casual_employee_1
     isDynamic: true
-    tableLocation: s3://msil-data-lake-curated/sr1/paylib_de/fcal_casual_employee
+    tableLocation: s3://msil-cross-account-e-uoc6xkg3m8ej4eidh3xw14bzkft4caps3b-s3alias/sr1/paylib_de/fcal_casual_employee/
     optional:
       persistDataFrame: false
       enableDataReconciliation: false
@@ -61,7 +61,7 @@ inputPorts:
     type: readDeltaTable
   - alias: fpay_empl_curated_1
     isDynamic: true
-    tableLocation: s3://msil-data-lake-curated/sr1/pay_de/fpay_empl
+    tableLocation: s3://msil-cross-account-e-uoc6xkg3m8ej4eidh3xw14bzkft4caps3b-s3alias/sr1/pay_de/fpay_empl/
     optional:
       persistDataFrame: false
       enableDataReconciliation: false
