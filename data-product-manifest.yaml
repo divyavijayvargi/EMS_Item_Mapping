@@ -1,4 +1,4 @@
-version: 0.0.42
+version: 0.0.45
 jobId: "1105"
 jobName: Item Mapping Master
 jobType: Source Aligned Data Product
@@ -151,7 +151,7 @@ productState:
         sourceColumn: Audit column
         sourceTable: ""
   stateStoreType: loadDataIceberg
-  isProfilingEnabled: false
+  isProfilingEnabled: true
   updateStrategy: Overwrite
   tableName: msil_dataverse_production_catalog.Item_Mapping_Master
   warehousePath: s3://msil-dataverse-production/
